@@ -27,4 +27,12 @@ int main() {
 
         orders.push_back(row);  // Append curren't row's array to the vector
     }
+
+    // DEBUG: To print read values
+    // for (auto row : orders) {
+    //     for (auto data : row) {
+    //         cout << data << " ";
+    //     }
+    //     cout << endl;
+    // }
 }
