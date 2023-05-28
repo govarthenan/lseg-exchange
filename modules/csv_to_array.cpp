@@ -7,16 +7,25 @@
 
 using namespace std;
 
+struct Order {
+    string order_id;
+    string instrument;
+    int side;
+    double price;
+    int quantity;
+};
+
 int main() {
     ifstream data_file(".\\orders.csv");  // Orders source file
 
     string possible_instruments[] = {"Rose", "Lavender", "Lotus", "Tulip", "Orchid"};  // For validation
-    int valid_instrument;  // Indicator variable for validating instrument value
+    int valid_instrument;                                                              // Indicator variable for validating instrument value
 
-    array<string, 5> row;             // To store each row
-    vector<array<string, 5>> orders;  // Master vector to store transaction orders
+    string temp;           // For temporarily storage during reading values
+    Order row;             // To store each row
+    vector<Order> orders;  // Master vector to store transaction orders
 
-    int n = 0;             // DEBUG: line counter
+    int n = 0;  // DEBUG: line counter
 
     if (!data_file) {  // Check if file is read
         cout << "Error reading file!" << endl;
@@ -28,23 +37,27 @@ int main() {
     // Read the file as long as the file pointer is good
     // Read each data point. Try to validate it.
     // On fail, move file pointer to next line and skip iteration.
+    // If valid, assign to struct and push struct to master vector.
     while (data_file.good()) {  // When filestream is being read, iterate each line
         n++;                    // DEBUG: line counter
-        // Column 1
-        getline(data_file, row[0], ',');
 
-        if ((row[0].length() < 1) || (row[0].length() > 7)) {
+        row = {};  // Rest all members of the struct
+
+        // Column 1 - User Order ID
+        getline(data_file, row.order_id, ',');
+
+        if ((row.order_id.length() < 1) || (row.order_id.length() > 7)) {
             cout << "Line " << n << " skipped!. (Column 1)" << endl;  // DEBUG
             data_file.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
 
-        // Column 2
-        getline(data_file, row[1], ',');
+        // Column 2 - Instrument
+        getline(data_file, row.instrument, ',');
 
         valid_instrument = 0;  // For each new row, set the indicator as 0, since it's unchecked
         for (string instrument : possible_instruments) {
-            if (instrument == row[1]) {
+            if (instrument == row.instrument) {
                 valid_instrument = 1;  // If value is in possible values
             }
         }
@@ -55,45 +68,46 @@ int main() {
             continue;
         }
 
-        // Column 3
-        getline(data_file, row[2], ',');
+        // Column 3 - Side
+        getline(data_file, temp, ',');
 
-        if ((row[2] != "1") && (row[2] != "2")) {
+        if ((temp != "1") && (temp != "2")) {
             cout << "Line " << n << " skipped!. (Column 3)" << endl;  // DEBUG
             data_file.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
 
-        // Column 4
-        getline(data_file, row[3], ',');
+        row.side = stoi(temp);  // Assign converted valid value to struct
 
-        int read_quantity = stoi(row[3]);
-        if ((read_quantity < 10) || (read_quantity > 1000) || (read_quantity % 10 != 0)) {
+        // Column 4 - Quantity
+        getline(data_file, temp, ',');
+        row.quantity = stoi(temp);  // Convert and store
+
+        if (((row.quantity % 10) != 0) || (row.quantity < 10) || (row.quantity > 1000)) {
             cout << "Line " << n << " skipped!. (Column 4)" << endl;  // DEBUG
             data_file.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
-        // Column 5
-        getline(data_file, row[4], '\n');
 
-        double read_price = stod(row[4]);
-        if (read_price <= 0.0) {
+        // Column 5 - Price
+        getline(data_file, temp, '\n');
+        row.price = stod(temp);  // Convert and store
+
+        if (row.price <= 0.0) {
             cout << "Line " << n << " skipped!. (Column 5)" << endl;  // DEBUG
-            data_file.ignore(numeric_limits<streamsize>::max(), '\n');
+            // data_file.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
 
         // DEBUG
-        // cout << "Line " << n << " read!" << endl;
+        cout << "Line " << n << " read!" << endl;
 
         orders.push_back(row);  // Append each row to master vector
     }
 
     // DEBUG: To print read values
-    // for (auto row : orders) {
-    //     for (auto data : row) {
-    //         cout << data << " ";
-    //     }
-    //     cout << endl;
+    // cout << endl;
+    // for (auto line : orders) {
+    //     cout << line.order_id << " " << line.instrument << " " << line.side << " " << line.quantity << " " << line.price << endl;
     // }
 }
