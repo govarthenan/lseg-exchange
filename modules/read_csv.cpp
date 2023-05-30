@@ -15,8 +15,8 @@ struct Order {
     int quantity;
 };
 
-int main() {
-    ifstream data_file(".\\orders.csv");  // Orders source file
+vector<Order> readCSVFile(const string& filename) {
+    ifstream data_file(filename);  // Orders source file
 
     string possible_instruments[] = {"Rose", "Lavender", "Lotus", "Tulip", "Orchid"};  // For validation
     int valid_instrument;                                                              // Indicator variable for validating instrument value
@@ -29,7 +29,7 @@ int main() {
 
     if (!data_file) {  // Check if file is read
         cout << "Error reading file!" << endl;
-        return 0;
+        return orders;  // Return empty vector
     } else {
         cout << "File read successfully!" << endl;
     }
@@ -41,7 +41,7 @@ int main() {
     while (data_file.good()) {  // When filestream is being read, iterate each line
         n++;                    // DEBUG: line counter
 
-        row = {};  // Rest all members of the struct
+        row = {};  // Reset all members of the struct
 
         // Column 1 - User Order ID
         getline(data_file, row.order_id, ',');
@@ -99,15 +99,18 @@ int main() {
             continue;
         }
 
-        // DEBUG
-        cout << "Line " << n << " read!" << endl;
-
         orders.push_back(row);  // Append each row to master vector
     }
 
+    return orders;  // Return the master vector
+}
+
+int main() {
+    vector<Order> orders = readCSVFile("../orders.csv");
+
     // DEBUG: To print read values
-    // cout << endl;
-    // for (auto line : orders) {
-    //     cout << line.order_id << " " << line.instrument << " " << line.side << " " << line.quantity << " " << line.price << endl;
-    // }
+    cout << endl;
+    for (auto line : orders) {
+        cout << line.order_id << " " << line.instrument << " " << line.side << " " << line.quantity << " " << line.price << endl;
+    }
 }
